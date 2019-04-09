@@ -1,9 +1,22 @@
 package wandroid.group4.com.myapplication.chat;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import wandroid.group4.com.myapplication.R;
+import wandroid.group4.com.myapplication.bean.LoginBean;
+import wandroid.group4.com.myapplication.bean.MessageBean;
+import wandroid.group4.com.myapplication.msgs.MessageEvent;
 
 /**
  * Created by vondear on 2019/4/9
@@ -22,11 +35,42 @@ import wandroid.group4.com.myapplication.R;
  */
 public class ChatActivity extends AppCompatActivity {
 
+    private RecyclerView recy;
+    private   List<Object> mObjectList = new ArrayList<>();
+    private Recyadapter mRecyadapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        initView();
+    }
 
-        //123
+    private void initView() {
+        recy = (RecyclerView) findViewById(R.id.recy);
+        recy.setLayoutManager(new LinearLayoutManager(this));
+        mRecyadapter = new Recyadapter(this, mObjectList);
+        recy.setAdapter(mRecyadapter);
+        mRecyadapter.notifyDataSetChanged();
+        recy.scrollToPosition(mObjectList.size()-1);
+        EventBus.getDefault().register(this);
+    }
+
+    //用于接收传MessageEvent这个类的消息
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onShowMessageEvent(MessageEvent messageEvent) {
+        if(messageEvent.data instanceof LoginBean){
+            mObjectList.add(messageEvent.data);
+            mRecyadapter.notifyDataSetChanged();
+        }else if(messageEvent.data instanceof MessageBean) {
+            mObjectList.add(messageEvent.data);
+            mRecyadapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 }

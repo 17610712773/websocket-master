@@ -15,11 +15,12 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 import wandroid.group4.com.myapplication.bean.LoginBean;
+import wandroid.group4.com.myapplication.bean.MessageBean;
 import wandroid.group4.com.myapplication.msgs.MessageEvent;
 
 public class WebSocketManager {
 
-    private String server_url = "http://172.16.53.30:4001/";
+    private String server_url = "http://172.16.53.5:4001/";
 
     private Socket mSocket;
     public WebSocketManager(){
@@ -47,6 +48,21 @@ public class WebSocketManager {
         }
     }
 
+    public void data(int type,String userid, String username,String content){
+        JSONObject data = new JSONObject();
+        try {
+            data.put("type",type);
+            data.put("userid",userid);
+            data.put("username",username);
+            data.put("content",content);
+            mSocket.emit("data",data.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
     //链接在状态
     private Emitter.Listener connListener = new Emitter.Listener() {
         @Override
@@ -60,8 +76,16 @@ public class WebSocketManager {
         @Override
         public void call(Object... args) {
             Log.i("msg",args.toString());
+            if(args.length > 0){
+                MessageEvent msgEvt1 = new MessageEvent();
+                msgEvt1.Type = MessageEvent.MsgType.CHAT;
+                msgEvt1.Code = 200;
+                msgEvt1.data = new Gson().fromJson(args[0].toString(), MessageBean.class);
+                EventBus.getDefault().post(msgEvt1);
+            }
         }
     };
+
 
     //连接断开
     private Emitter.Listener connErrorListener = new Emitter.Listener() {
