@@ -53,6 +53,8 @@ public class LoginActivity extends AppCompatActivity {
     public void handleMessage(MessageEvent msg){
         if(msg.Type == MessageEvent.MsgType.LOGIN){
             Intent intent = new Intent(this, ChatActivity.class);
+            String s = editUsername.getText().toString();
+            intent.putExtra("name",s);
             startActivity(intent);
             finish();
         }

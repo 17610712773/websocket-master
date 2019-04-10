@@ -41,7 +41,6 @@ public class Recyadapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
         My1 my1 = (My1) viewHolder;
-
         Object o = mObjectList.get(i);
         MessageBean messageBean = (MessageBean) mObjectList.get(i);
         my1.mTv1.setText(messageBean.getUsername() + ":");

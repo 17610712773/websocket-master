@@ -1,10 +1,13 @@
 package wandroid.group4.com.myapplication.chat;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -17,6 +20,7 @@ import wandroid.group4.com.myapplication.R;
 import wandroid.group4.com.myapplication.bean.LoginBean;
 import wandroid.group4.com.myapplication.bean.MessageBean;
 import wandroid.group4.com.myapplication.msgs.MessageEvent;
+import wandroid.group4.com.myapplication.server.WebSocketManager;
 
 /**
  * Created by vondear on 2019/4/9
@@ -36,8 +40,10 @@ import wandroid.group4.com.myapplication.msgs.MessageEvent;
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView recy;
-    private   List<Object> mObjectList = new ArrayList<>();
+    private List<Object> mObjectList = new ArrayList<>();
     private Recyadapter mRecyadapter;
+    private EditText edTv;
+    private Button tvBt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,21 +54,34 @@ public class ChatActivity extends AppCompatActivity {
 
     private void initView() {
         recy = (RecyclerView) findViewById(R.id.recy);
+        edTv = (EditText) findViewById(R.id.ed_tv);
+        tvBt = (Button) findViewById(R.id.tv_bt);
         recy.setLayoutManager(new LinearLayoutManager(this));
         mRecyadapter = new Recyadapter(this, mObjectList);
         recy.setAdapter(mRecyadapter);
         mRecyadapter.notifyDataSetChanged();
-        recy.scrollToPosition(mObjectList.size()-1);
+        recy.scrollToPosition(mObjectList.size() - 1);
+        Intent intent = getIntent();
+        final String name = intent.getStringExtra("name");
+        tvBt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WebSocketManager.getInstance().dataa(0,"",name,edTv.getText().toString());
+                edTv.setText("");
+            }
+        });
+
         EventBus.getDefault().register(this);
+
     }
 
     //用于接收传MessageEvent这个类的消息
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onShowMessageEvent(MessageEvent messageEvent) {
-        if(messageEvent.data instanceof LoginBean){
+        if (messageEvent.data instanceof LoginBean) {
             mObjectList.add(messageEvent.data);
             mRecyadapter.notifyDataSetChanged();
-        }else if(messageEvent.data instanceof MessageBean) {
+        } else if (messageEvent.data instanceof MessageBean) {
             mObjectList.add(messageEvent.data);
             mRecyadapter.notifyDataSetChanged();
         }

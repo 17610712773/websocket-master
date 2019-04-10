@@ -48,14 +48,14 @@ public class WebSocketManager {
         }
     }
 
-    public void data(int type,String userid, String username,String content){
+    public void dataa(int type,String userid, String username,String content){
         JSONObject data = new JSONObject();
         try {
             data.put("type",type);
             data.put("userid",userid);
             data.put("username",username);
             data.put("content",content);
-            mSocket.emit("data",data.toString());
+            mSocket.send(data.toString());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -71,6 +71,13 @@ public class WebSocketManager {
         }
     };
 
+
+    private Emitter.Listener fa = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+
+        }
+    };
     //接收新消息
     private Emitter.Listener newMsgListener = new Emitter.Listener() {
         @Override
@@ -119,6 +126,8 @@ public class WebSocketManager {
     };
 
 
+
+
     //初始化连接
     class Task implements Runnable{
 
@@ -126,11 +135,11 @@ public class WebSocketManager {
         public void run() {
             try {
                 mSocket = IO.socket(server_url);
-                mSocket.on(Socket.EVENT_CONNECT,connListener);
-                mSocket.on(Socket.EVENT_MESSAGE,newMsgListener);
-                mSocket.on("login",loginListener);
-                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT,connTimeOut);
-                mSocket.off(Socket.EVENT_CONNECT,connErrorListener);
+                mSocket.on(Socket.EVENT_CONNECT,connListener);// 连接成功
+                mSocket.on(Socket.EVENT_MESSAGE,newMsgListener);//接受消息
+                mSocket.on("login",loginListener);//登陆
+                mSocket.on(Socket.EVENT_CONNECT_TIMEOUT,connTimeOut);//连接超时
+                mSocket.off(Socket.EVENT_CONNECT,connErrorListener);//断开连接
                 mSocket.connect();
             }catch (URISyntaxException e){
                 e.printStackTrace();
